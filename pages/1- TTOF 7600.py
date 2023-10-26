@@ -1,38 +1,27 @@
-import streamlit as st
-import numpy as np
-from streamlit_extras.app_logo import add_logo
-import pandas as pd
-import matplotlib.pyplot as plt 
-from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
-                               AutoMinorLocator)
-import matplotlib.dates as mdates
-import matplotlib
-import random
-import altair as alt
-from datetime import datetime, timedelta
 import os
-from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
-from st_aggrid import AgGrid, GridUpdateMode
-from st_aggrid.grid_options_builder import GridOptionsBuilder
+import sys
 
+### Get relative subfolder path
+subdirectory_folder_path = os.path.dirname(__file__)
+
+### imports all variables in Variables.py
+sys.path.append(os.path.join(subdirectory_folder_path, '..', 'Utilities'))
+from Constantes import *
+#imports all variables in Variables.py
+from Functions import *
+# import Functions as functions
+from Imports import *
+
+### Now time to be used in script
 current_datetime = datetime.now()
 current_date = current_datetime.strftime("%Y-%m-%d")
 
+### To be run once to update matplotlib default parameters
 matplotlib.rcParams.update({'font.size': 20, 'xtick.color' : 'black', 'axes.labelcolor': 'black'})
 st.set_page_config(layout="wide")
 
-cwd = os.path.dirname(__file__)
 
-
-def tables(dataframe):
-    gd = GridOptionsBuilder.from_dataframe(dataframe)
-    gd.configure_selection(selection_mode='multiple', use_checkbox=True)
-    gridoptions = gd.build()
-
-    grid_table = AgGrid(dataframe, gridOptions=gridoptions, use_container_width = True,
-                        update_mode=GridUpdateMode.SELECTION_CHANGED)
-    
-    
+""" Setup TTOF 7600 Web page """
 
 add_logo("https://allumiqs.com/wp-content/uploads/2022/06/AG-Icon-238x232.png", height=200) #TODO: move this to a utils module
 
@@ -54,95 +43,72 @@ st.info(f'Run this section to show the final detector voltage reported after eac
 st.warning('Work in progress')
 
 
-# Sample data
-random_numbers = [random.randint(2000, 2800) for _ in range(30)]  # Change 10 to the desired number of random numbers
-chart_data = pd.DataFrame({'Detector voltage (V)': random_numbers})
+def main():
+    ## Generates data (Dectector voltage and datetime)
+    # random_numbers = np.arange(0, 3000, 30, dtype=None)  # Change 10 to the desired number of random numbers
+    # x = np.linspace(0, 4 * np.pi, 20)
+    # random_numbers = 1500 * np.sin(x) + 1500
+    # chart_data = pd.DataFrame({'Detector voltage (V)': random_numbers})
 
-start_date = datetime(2021, 1, 1)
-end_date = datetime(2023, 12, 31)
-random_dates = [start_date + timedelta(days=random.randint(0, (end_date - start_date).days)) for _ in range(30)]
+    # start_date = datetime(2021, 1, 1)
+    # end_date = datetime(2023, 12, 31)
+    # base = datetime(2000, 1, 1)
+    # random_dates = np.array([base + timedelta(days=i) for i in range(20)])
 
-
-
-chart_data['Timelapse'] = random_dates
-chart_data['Timelapse'] = pd.to_datetime(chart_data['Timelapse'], format='%d/%m/%y')
-slide_min, slide_max = chart_data['Timelapse'].agg(['min', 'max'])
-
-chart_data = chart_data.sort_values(by='Timelapse')
-
-# Thresholds of voltage
-chart_data['Notify Zef (2700V)'] = 2700
-chart_data['To replace (2750V)'] = 2750
-chart_data['Maximum (2850V)'] = 2850
-
-# Creates the figure to add in App
-fig, ax = plt.subplots()
-
-line = ax.plot(chart_data['Timelapse'], chart_data['Detector voltage (V)'] , linestyle='-', color='#00c0f3', label='Detector voltage (V)')
-line += ax.plot(chart_data['Timelapse'], chart_data['Notify Zef (2700V)'] , linestyle='-', color='yellow', label='Notify Zef (2700V)')
-line += ax.plot(chart_data['Timelapse'], chart_data['To replace (2750V)'] , linestyle='-', color='red', label='To replace (2750V)')
-line += ax.plot(chart_data['Timelapse'], chart_data['Maximum (2850V)'] , linestyle='-', color='black', label='Maximum (2850V)')
-
-# ax.set_xlabel("Date")
-ax.set_ylabel("Detector voltage (V)")
-ax.legend(fancybox=True, framealpha=1, shadow=True, borderpad=1, handles=line,handlelength=0.5, loc='center left', bbox_to_anchor=(0.87, 0.5),handletextpad=-0.2,  fontsize='small')
-
-dtFmt = mdates.DateFormatter('%Y-%b') # define the formatting
-plt.gca().xaxis.set_major_formatter(dtFmt) 
-# show every 12th tick on x axes
-plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-plt.xticks(rotation=90, fontweight='bold',  fontsize='x-small')
-
-plt.tight_layout()
-#Adds the figure
-
-data_container = st.container()
-
-with data_container:
-    table, plot = st.columns(spec = [0.2,0.8])
-    with table:
-        tables(chart_data.drop(['Notify Zef (2700V)', 'To replace (2750V)', 'Maximum (2850V)'], axis=1))
-        # @st.cache
-        # df = chart_data.drop(['Notify Zef (2700V)', 'To replace (2750V)', 'Maximum (2850V)'], axis=1)
-        # gd = GridOptionsBuilder.from_dataframe(df)
-        # gd.configure_selection(selection_mode='multiple', use_checkbox=True)
-        # gridoptions = gd.build()
-
-        # grid_table = AgGrid(df, height=250, gridOptions=gridoptions,
-        #                     update_mode=GridUpdateMode.SELECTION_CHANGED)
-            
-    # st.dataframe(chart_data.drop(['Notify Zef (2700V)', 'To replace (2750V)', 'Maximum (2850V)'], axis=1), hide_index=True, use_container_width=True)
+    # chart_data['Timelapse'] = random_dates
+    # chart_data['Timelapse'] = pd.to_datetime(chart_data['Timelapse'], format='%d/%m/%y')
+    # slide_min, slide_max = chart_data['Timelapse'].agg(['min', 'max'])
+    # print(type(slide_min), type(slide_min.to_pydatetime()))
+    # slider_lim = sliders_datetime(slide_min,slide_max)
     
-    with plot:
-        start_date = datetime(2020, 1, 1)
 
- 
-        selected_date_range = st.slider(
-            "Select a date range",
-            min_value=slide_min,
-            max_value=slide_max,
-            value= (slide_min.to_pydatetime(), slide_max.to_pydatetime()),
-            # step=timedelta(days=1),
-            format='DD/MM/YY'
-        )
-        st.plotly_chart(fig, use_container_width = True, theme=None)
+    # chart_data = chart_data.sort_values(by='Timelapse')
 
+    chart_data = fetch_detector_zeno(r'\\Zeno-7600\v\Tuning_report\Complete_Tuning\Positive mode')
 
+    # print(chart_data['Date'])
 
-### Notes section
-path_components = cwd.split(os.path.sep)
-new_path_components = path_components[:-1]
-notes_dir = os.path.sep.join(new_path_components)
+    # chart_data['Date'] = pd.to_datetime(chart_data['Date'], format="%Y-%m-%d %I:%M %p")
+
+    slide_min, slide_max = chart_data['Date'].agg(['min', 'max'])
+
+    # print(type(slide_min))#, type(datetime.strptime(slide_min, "%Y-%m-%d %H:%M:%S")))
+
+    slider_lim = sliders_datetime(slide_min,slide_max)
 
 
-with open(os.path.join(notes_dir,'Notes\\notes_zeno_detector.txt'), 'a') as file:
-    input_notes_detector = st.text_input(label ='Input any comments or notes') 
-    if input_notes_detector:
-        file.write('\n' + input_notes_detector + ' ('+ current_date +')  ')
-    
-    # close()
-with open(os.path.join(notes_dir,'Notes\\notes_zeno_detector.txt'), 'r') as file:
-    notes_detector = file.read()       
 
+    ### Thresholds of voltage for the plot
+    chart_data['Notify Zef (2700V)'] = DETECTOR_WARNING_7600
+    chart_data['To replace (2750V)'] = DETECTOR_REPLACEMENT_7600
+    chart_data['Maximum (2850V)'] = DETECTOR_MAXIMUM_7600
 
-st.markdown(notes_detector)
+    # Creates a container to put table and plot side by side
+    data_container = st.container()
+    with data_container:
+        table, plot = st.columns(spec = [0.25,0.75]) #25% window width for table and 75% width for plot
+        with table:
+
+            # Creates the table
+            list_select = []
+            grid_table = table_selector_datetime(chart_data.drop(['Notify Zef (2700V)', 'To replace (2750V)', 'Maximum (2850V)'], axis=1), list_select, [slider_lim])
+
+        with plot:
+            ### Filters the data based on checked table rows
+            chart_data = chart_data[chart_data['Date'].isin(grid_table['Date'])]
+
+            # Plots the detector voltage
+            fig = figure_detector_zeno(chart_data)
+            st.plotly_chart(fig, use_container_width = True, theme=None)
+
+    ### Detector Notes section
+    with open(os.path.join(subdirectory_folder_path, '..','Notes\\notes_zeno_detector.txt'), 'a') as file:
+        input_notes_detector = st.text_input(label ='Input any comments or notes',help = 'Dont know how to write?') 
+        if input_notes_detector:
+            file.write('\n' + input_notes_detector + ' ('+ current_date +')  ')
+        
+    with open(os.path.join(subdirectory_folder_path, '..','Notes\\notes_zeno_detector.txt'), 'r') as file:
+        notes_detector = file.read()       
+    st.markdown(notes_detector)
+
+main()
