@@ -7,16 +7,21 @@ import matplotlib.dates as mdates
 import pandas as pd
 import os
 import fitz
-from tika import parser 
+from PyPDF2 import PdfReader
 
 
+
+"""Create a table for datetime with checkboxes selector"""
 # @st.cache_data(experimental_allow_widgets=True) 
+
 def table_selector_datetime(df, list_select,slider_lim):
     df_with_selections = df.copy()
 
     if not list_select:
         df_with_selections.insert(0, "Select", True)
         df_with_selections['Select'] = (df_with_selections['Date'] <= slider_lim[0][1]) & (df_with_selections['Date'] >= slider_lim[0][0])
+
+    # print(st.column_config.CheckboxColumn(required=True))
 
     # Get dataframe row-selections from user with st.data_editor
     edited_df = st.data_editor(
@@ -30,6 +35,7 @@ def table_selector_datetime(df, list_select,slider_lim):
     selected_rows = edited_df[edited_df.Select]
     return selected_rows.drop('Select', axis=1)
 
+"""Create a slider for datetime"""
 # @st.cache_data(experimental_allow_widgets=True) 
 def sliders_datetime(slide_min,slide_max):
     slider = st.slider(
@@ -42,13 +48,15 @@ def sliders_datetime(slide_min,slide_max):
         )
     return slider
 
-def figure_detector_zeno(chart_data):
+"""Creates the plot for the detector voltage of the 7600"""
+# @st.cache_data(experimental_allow_widgets=True) 
+def figure_detector(chart_data):
     fig, ax = plt.subplots()
 
     line = ax.plot(chart_data['Date'], chart_data['CEM voltage (V)'] , linestyle='-', color='#00c0f3', label='CEM voltage (V)')
-    line += ax.plot(chart_data['Date'], chart_data['Notify Zef (2700V)'] , linestyle='-', color='yellow', label='Notify Zef (2700V)')
-    line += ax.plot(chart_data['Date'], chart_data['To replace (2750V)'] , linestyle='-', color='red', label='To replace (2750V)')
-    line += ax.plot(chart_data['Date'], chart_data['Maximum (2850V)'] , linestyle='-', color='black', label='Maximum (2850V)')
+    line += ax.plot(chart_data['Date'], chart_data.iloc[:, 2] , linestyle='-', color='yellow', label= chart_data.columns[2])
+    line += ax.plot(chart_data['Date'], chart_data.iloc[:, 3] , linestyle='-', color='red', label= chart_data.columns[3])
+    line += ax.plot(chart_data['Date'], chart_data.iloc[:, 4] , linestyle='-', color='black', label= chart_data.columns[4])
 
     # ax.set_xlabel("Date")
     ax.set_ylabel("CEM voltage (V)")
@@ -56,15 +64,18 @@ def figure_detector_zeno(chart_data):
 
     dtFmt = mdates.DateFormatter('%Y-%b') # define the formatting
     plt.gca().xaxis.set_major_formatter(dtFmt) 
-    # show every 12th tick on x axes
     # plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     plt.xticks(rotation=90, fontweight='bold',  fontsize='x-small')
     plt.tight_layout()
 
     return fig
 
-volta = []
+"""Fetches the detector voltage in all .xps file in the specified path for the 7600"""
+volta_7600 = []
+@st.cache_data(experimental_allow_widgets=True) 
 def fetch_detector_zeno(search_dir_volt):
+    print('Fetching Zeno detector voltage')
+
     for (root,dirs,files) in os.walk(search_dir_volt, topdown=True):
             for filename in files:
                 if filename.endswith(".xps"):
@@ -81,14 +92,7 @@ def fetch_detector_zeno(search_dir_volt):
 
                                 if 'Instrument Tuning Report' in text:
                                     acq_time = text[text.index('Instrument Tuning Report')+1]
-
-                                    # input_format = "%Y-%m-%d %I:%M %p"  # For "2022-08-17 3:52 PM"
-                                    # output_format = "%Y-%m-%d %H:%M:%S"  # For "2022-08-17 15:52:00"
-
                                     acq_time = datetime.strptime(acq_time, "%Y-%m-%d %I:%M %p")
-                                    # acq_time = parsed_datetime.strftime("%Y-%m-%d %H:%M:%S")
-                                    # datetime.strptime(slide_min, "%Y-%m-%d %H:%M:%S")
-                                    # print(acq_time)
 
                                 text = [item.split(":") for item in text]
                                 text = [item for sublist in text for item in sublist]
@@ -96,20 +100,58 @@ def fetch_detector_zeno(search_dir_volt):
                                 if 'Final detector voltage' in text:
                                     volt = float(text[text.index('Final detector voltage')+1][:-1])
                                     break
-
-                        volta.append(np.array([acq_time, volt]))
-
+                        volta_7600.append(np.array([acq_time, volt]))
                     except:
                         print(f'Error opening file : {filename}')
 
     df = pd.DataFrame(volta)
-
-    current_val = int(round(float(volta[-1][1])))
+    # current_val = int(round(float(volta[-1][1])))
 
     df.rename(columns={0: 'Date', 1: 'CEM voltage (V)'}, inplace=True)
-    # df.rename(columns={0: 'Date', 1: f'CEM (V) ({current_val}V)'}, inplace=True)
     df = df.sort_values(by ='Date')
 
-    # df[f'CEM (V) ({current_val}V)']=df[f'CEM (V) ({current_val}V)'].astype(float)
+    ### Temporary fix because multiple Final detector voltage in same xps file ??
+    df = df.drop_duplicates(subset=['Date','CEM voltage (V)'])
+
+    return df
+
+"""Fetches the detector voltage in all .pdf file in the specified path for the 6600"""
+volta = []
+@st.cache_data(experimental_allow_widgets=True) 
+def fetch_detector_6600(search_dir_volt):
+    for (root,dirs,files) in os.walk(search_dir_volt, topdown=True):
+        for filename in files:
+            if filename.endswith(".pdf"):
+                try:
+                    f = os.path.join(root, filename)
+                        
+                    reader = PdfReader(f)
+                    number_of_pages = len(reader.pages)
+                    text = ''
+                    for page_number in range(number_of_pages):
+                        page = reader.pages[page_number]
+                        text += page.extract_text()
+
+                    text = text.split('\n')
+
+                    try:
+                        acq_time = datetime.strptime(text[0][:-2], "%Y-%m-%d at %H:%M")
+                    except:
+                        acq_time = 'error'
+                    
+                    for i in range(len(text)):
+                        if 'Optimal Detector voltage:' in text[i]:
+                            volt = int(text[i][-6:-2])
+                            volta.append(np.array([acq_time, volt]))
+                        # break            
+                except:
+                    print(f'Error opening file : {filename}')
+
+    df = pd.DataFrame(volta)
+    df.rename(columns={0: 'Date', 1: 'CEM voltage (V)'}, inplace=True)
+    df = df.sort_values(by ='Date')
+
+    ### Temporary fix because multiple Final detector voltage in same xps file ??
+    df = df.drop_duplicates(subset=['Date','CEM voltage (V)'])
 
     return df

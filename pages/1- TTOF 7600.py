@@ -6,10 +6,11 @@ subdirectory_folder_path = os.path.dirname(__file__)
 
 ### imports all variables in Variables.py
 sys.path.append(os.path.join(subdirectory_folder_path, '..', 'Utilities'))
+#imports all CONSTANTES in Constantes.py
 from Constantes import *
-#imports all variables in Variables.py
+#imports all FUNCTIONS in Functions.py
 from Functions import *
-# import Functions as functions
+# import all packages in Imports
 from Imports import *
 
 ### Now time to be used in script
@@ -21,7 +22,7 @@ matplotlib.rcParams.update({'font.size': 20, 'xtick.color' : 'black', 'axes.labe
 st.set_page_config(layout="wide")
 
 
-""" Setup TTOF 7600 Web page """
+#""" Setup TTOF 7600 Web page """
 
 add_logo("https://allumiqs.com/wp-content/uploads/2022/06/AG-Icon-238x232.png", height=200) #TODO: move this to a utils module
 
@@ -39,7 +40,7 @@ st.warning('Work in progress')
 
 st.subheader("""
 Detector voltage""")
-st.info(f'Run this section to show the final detector voltage reported after each Detector Optimization tuning.')
+st.info(f'Run this section to show the final detector voltage reported after each Detector Optimization tuning. This opens and reads all Positive Detector Optimization .xps files located in the Zeno-7600\v\Tuning_report\Complete_Tuning\Positive mode folder.')
 st.warning('Work in progress')
 
 
@@ -64,24 +65,17 @@ def main():
 
     # chart_data = chart_data.sort_values(by='Timelapse')
 
+    #Return the detector voltage listed in the path in a dataframe
     chart_data = fetch_detector_zeno(r'\\Zeno-7600\v\Tuning_report\Complete_Tuning\Positive mode')
 
-    # print(chart_data['Date'])
-
-    # chart_data['Date'] = pd.to_datetime(chart_data['Date'], format="%Y-%m-%d %I:%M %p")
-
+    #Creates a slider with the min and max date fetched
     slide_min, slide_max = chart_data['Date'].agg(['min', 'max'])
-
-    # print(type(slide_min))#, type(datetime.strptime(slide_min, "%Y-%m-%d %H:%M:%S")))
-
     slider_lim = sliders_datetime(slide_min,slide_max)
 
-
-
     ### Thresholds of voltage for the plot
-    chart_data['Notify Zef (2700V)'] = DETECTOR_WARNING_7600
-    chart_data['To replace (2750V)'] = DETECTOR_REPLACEMENT_7600
-    chart_data['Maximum (2850V)'] = DETECTOR_MAXIMUM_7600
+    chart_data[f'Notify Provider ({DETECTOR_WARNING_7600}V)'] = DETECTOR_WARNING_7600
+    chart_data[f'To replace ({DETECTOR_REPLACEMENT_7600}V)'] = DETECTOR_REPLACEMENT_7600
+    chart_data[f'Maximum ({DETECTOR_MAXIMUM_7600}V)'] = DETECTOR_MAXIMUM_7600
 
     # Creates a container to put table and plot side by side
     data_container = st.container()
@@ -90,15 +84,24 @@ def main():
         with table:
 
             # Creates the table
-            list_select = []
-            grid_table = table_selector_datetime(chart_data.drop(['Notify Zef (2700V)', 'To replace (2750V)', 'Maximum (2850V)'], axis=1), list_select, [slider_lim])
+
+            if 'grid_table' not in locals():
+                list_select = []
+            else:
+                list_select = grid_table
+                # print('not created')
+
+            grid_table = table_selector_datetime(chart_data.drop([f'Notify Provider ({DETECTOR_WARNING_7600}V)',f'To replace ({DETECTOR_REPLACEMENT_7600}V)', f'Maximum ({DETECTOR_MAXIMUM_7600}V)'], axis=1), list_select, [slider_lim])
+
+            list_select = grid_table
+            # print(list_select)
 
         with plot:
             ### Filters the data based on checked table rows
             chart_data = chart_data[chart_data['Date'].isin(grid_table['Date'])]
 
             # Plots the detector voltage
-            fig = figure_detector_zeno(chart_data)
+            fig = figure_detector(chart_data)
             st.plotly_chart(fig, use_container_width = True, theme=None)
 
     ### Detector Notes section
