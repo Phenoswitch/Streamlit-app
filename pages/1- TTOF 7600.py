@@ -66,16 +66,16 @@ def main():
     # chart_data = chart_data.sort_values(by='Timelapse')
 
     #Return the detector voltage listed in the path in a dataframe
-    chart_data = fetch_detector_zeno(r'\\Zeno-7600\v\Tuning_report\Complete_Tuning\Positive mode')
+    chart_data_zeno = fetch_detector_zeno(r'\\Zeno-7600\v\Tuning_report\Complete_Tuning\Positive mode')
 
     #Creates a slider with the min and max date fetched
-    slide_min, slide_max = chart_data['Date'].agg(['min', 'max'])
+    slide_min, slide_max = chart_data_zeno['Date'].agg(['min', 'max'])
     slider_lim = sliders_datetime(slide_min,slide_max)
 
     ### Thresholds of voltage for the plot
-    chart_data[f'Notify Provider ({DETECTOR_WARNING_7600}V)'] = DETECTOR_WARNING_7600
-    chart_data[f'To replace ({DETECTOR_REPLACEMENT_7600}V)'] = DETECTOR_REPLACEMENT_7600
-    chart_data[f'Maximum ({DETECTOR_MAXIMUM_7600}V)'] = DETECTOR_MAXIMUM_7600
+    chart_data_zeno[f'Notify Provider ({DETECTOR_WARNING_7600}V)'] = DETECTOR_WARNING_7600
+    chart_data_zeno[f'To replace ({DETECTOR_REPLACEMENT_7600}V)'] = DETECTOR_REPLACEMENT_7600
+    chart_data_zeno[f'Maximum ({DETECTOR_MAXIMUM_7600}V)'] = DETECTOR_MAXIMUM_7600
 
     # Creates a container to put table and plot side by side
     data_container = st.container()
@@ -91,17 +91,17 @@ def main():
                 list_select = grid_table
                 # print('not created')
 
-            grid_table = table_selector_datetime(chart_data.drop([f'Notify Provider ({DETECTOR_WARNING_7600}V)',f'To replace ({DETECTOR_REPLACEMENT_7600}V)', f'Maximum ({DETECTOR_MAXIMUM_7600}V)'], axis=1), list_select, [slider_lim])
+            grid_table = table_selector_datetime(chart_data_zeno.drop([f'Notify Provider ({DETECTOR_WARNING_7600}V)',f'To replace ({DETECTOR_REPLACEMENT_7600}V)', f'Maximum ({DETECTOR_MAXIMUM_7600}V)'], axis=1), list_select, [slider_lim])
 
             list_select = grid_table
             # print(list_select)
 
         with plot:
             ### Filters the data based on checked table rows
-            chart_data = chart_data[chart_data['Date'].isin(grid_table['Date'])]
+            chart_data_zeno = chart_data_zeno[chart_data_zeno['Date'].isin(grid_table['Date'])]
 
             # Plots the detector voltage
-            fig = figure_detector(chart_data)
+            fig = figure_detector(chart_data_zeno)
             st.plotly_chart(fig, use_container_width = True, theme=None)
 
     ### Detector Notes section

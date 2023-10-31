@@ -12,8 +12,6 @@ from PyPDF2 import PdfReader
 
 
 """Create a table for datetime with checkboxes selector"""
-# @st.cache_data(experimental_allow_widgets=True) 
-
 def table_selector_datetime(df, list_select,slider_lim):
     df_with_selections = df.copy()
 
@@ -36,7 +34,6 @@ def table_selector_datetime(df, list_select,slider_lim):
     return selected_rows.drop('Select', axis=1)
 
 """Create a slider for datetime"""
-# @st.cache_data(experimental_allow_widgets=True) 
 def sliders_datetime(slide_min,slide_max):
     slider = st.slider(
             "Select a date range before using the table checkboxes",
@@ -49,14 +46,13 @@ def sliders_datetime(slide_min,slide_max):
     return slider
 
 """Creates the plot for the detector voltage of the 7600"""
-# @st.cache_data(experimental_allow_widgets=True) 
-def figure_detector(chart_data):
+def figure_detector(data):
     fig, ax = plt.subplots()
 
-    line = ax.plot(chart_data['Date'], chart_data['CEM voltage (V)'] , linestyle='-', color='#00c0f3', label='CEM voltage (V)')
-    line += ax.plot(chart_data['Date'], chart_data.iloc[:, 2] , linestyle='-', color='yellow', label= chart_data.columns[2])
-    line += ax.plot(chart_data['Date'], chart_data.iloc[:, 3] , linestyle='-', color='red', label= chart_data.columns[3])
-    line += ax.plot(chart_data['Date'], chart_data.iloc[:, 4] , linestyle='-', color='black', label= chart_data.columns[4])
+    line = ax.plot(data['Date'], data['CEM voltage (V)'] , linestyle='-', color='#00c0f3', label='CEM voltage (V)')
+    line += ax.plot(data['Date'], data.iloc[:, 2] , linestyle='-', color='yellow', label= data.columns[2])
+    line += ax.plot(data['Date'], data.iloc[:, 3] , linestyle='-', color='red', label= data.columns[3])
+    line += ax.plot(data['Date'], data.iloc[:, 4] , linestyle='-', color='black', label= data.columns[4])
 
     # ax.set_xlabel("Date")
     ax.set_ylabel("CEM voltage (V)")
@@ -71,9 +67,9 @@ def figure_detector(chart_data):
     return fig
 
 """Fetches the detector voltage in all .xps file in the specified path for the 7600"""
-volta_7600 = []
 @st.cache_data(experimental_allow_widgets=True) 
 def fetch_detector_zeno(search_dir_volt):
+    volta_7600 = []
     print('Fetching Zeno detector voltage')
 
     for (root,dirs,files) in os.walk(search_dir_volt, topdown=True):
@@ -104,7 +100,7 @@ def fetch_detector_zeno(search_dir_volt):
                     except:
                         print(f'Error opening file : {filename}')
 
-    df = pd.DataFrame(volta)
+    df = pd.DataFrame(volta_7600)
     # current_val = int(round(float(volta[-1][1])))
 
     df.rename(columns={0: 'Date', 1: 'CEM voltage (V)'}, inplace=True)
@@ -116,9 +112,9 @@ def fetch_detector_zeno(search_dir_volt):
     return df
 
 """Fetches the detector voltage in all .pdf file in the specified path for the 6600"""
-volta = []
 @st.cache_data(experimental_allow_widgets=True) 
 def fetch_detector_6600(search_dir_volt):
+    volta = []
     for (root,dirs,files) in os.walk(search_dir_volt, topdown=True):
         for filename in files:
             if filename.endswith(".pdf"):
