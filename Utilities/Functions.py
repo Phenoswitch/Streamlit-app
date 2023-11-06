@@ -10,6 +10,12 @@ import fitz
 from PyPDF2 import PdfReader
 
 
+#imports all CONSTANTES in Constantes.py
+from Constantes import *
+# import all packages in Imports
+from Imports import *
+
+
 
 """Create a table for datetime with checkboxes selector"""
 def table_selector_datetime(df, list_select,slider_lim):
@@ -18,8 +24,6 @@ def table_selector_datetime(df, list_select,slider_lim):
     if not list_select:
         df_with_selections.insert(0, "Select", True)
         df_with_selections['Select'] = (df_with_selections['Date'] <= slider_lim[0][1]) & (df_with_selections['Date'] >= slider_lim[0][0])
-
-    # print(st.column_config.CheckboxColumn(required=True))
 
     # Get dataframe row-selections from user with st.data_editor
     edited_df = st.data_editor(
@@ -151,3 +155,101 @@ def fetch_detector_6600(search_dir_volt):
     df = df.drop_duplicates(subset=['Date','CEM voltage (V)'])
 
     return df
+
+def table_MS_qualification_TOF_6600(current_QC_TOF_values):
+    #Creates the multiindex df to have merged column headers in the table
+    columns_MS = pd.MultiIndex.from_tuples([
+        ('', 'Mass (Da)'),
+        ('TOF MS+ ITC 00', 'Resolution'),
+        ('TOF MS+ ITC 00', 'Intensity Sum'),
+        ('TOF MS+ ITC 01', 'Resolution'),
+        ('TOF MS+ ITC 01', 'Intensity Sum')
+    ])
+
+    # Create the data for the DataFrame
+    data_MS = [['Tuning Sol 829.54', MS_QUALIFICATIONS_ITC00_RESOLUTION, f'{float(MS_QUALIFICATIONS_ITC00_INTENSITY):.1e}' , MS_QUALIFICATIONS_ITC01_RESOLUTION, f'{float(MS_QUALIFICATIONS_ITC01_INTENSITY):.1e}']]
+    df_MS_qualification = pd.DataFrame(data_MS, columns=columns_MS)
+ 
+    #Here is to have green for values over the thresholds and red if under in the rendered table
+    MS_QUALIFICATIONS_TOF_COLOR = []
+    for i in range(len(current_QC_TOF_values)):
+        if current_QC_TOF_values[i] >= MS_QUALIFICATIONS_TOF_QC[i]:
+            MS_QUALIFICATIONS_TOF_COLOR.append("#00ff00")
+        else:
+            MS_QUALIFICATIONS_TOF_COLOR.append("#ff0000")
+
+    new_row_data = ['Current value', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[0]}>{current_QC_TOF_values[0]}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[1]}>{float(current_QC_TOF_values[1]):.1e}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[2]}>{current_QC_TOF_values[2]}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[3]}>{float(current_QC_TOF_values[3]):.1e}</FONT></b>']
+    df_MS_qualification.loc['Current value'] = new_row_data
+
+    #Remove the index 0 from the render
+    df_MS_qualification.index = ['', '']
+    #Centers the text in the df for beauty
+    df_MS_qualification = df_MS_qualification.style.set_table_styles([{
+        'selector': 'th',
+        'props': [('text-align', 'center')]
+    }, {
+        'selector': 'td',
+        'props': [('text-align', 'center')]
+    }])
+
+    return(df_MS_qualification)
+
+def table_MS_qualification_MSMS_6600(current_QC_MSMS_values):
+    #Creates the multiindex df to have merged column headers in the table
+    columns_MSMS = pd.MultiIndex.from_tuples([
+        ('', 'Mass (Da)'),
+        ('MS/MS+ HR ITC 10', 'Resolution'),
+        ('MS/MS+ HR ITC 10', 'Intensity Sum'),
+        ('MS/MS+ HS ITC 10', 'Resolution'),
+        ('MS/MS+ HS ITC 10', 'Intensity Sum'), 
+        ('HS/HR ITC 10', 'Intensity gain')
+    ])
+
+    # Create the data for the DataFrame
+    data_MSMS = [['Tuning Sol 829>381', MS_QUALIFICATIONS_HR_RESOLUTION, MS_QUALIFICATIONS_HR_INTENSITY , MS_QUALIFICATIONS_HS_RESOLUTION, f'{float(MS_QUALIFICATIONS_HS_INTENSITY):.1e}', f'{round(MS_QUALIFICATIONS_HSHR_RATIO,1)}']]
+    df_MSMS_qualification = pd.DataFrame(data_MSMS, columns=columns_MSMS)
+
+    MSMS_QUALIFICATIONS_TOF_COLOR = []
+    for i in range(len(current_QC_MSMS_values)):
+        if current_QC_MSMS_values[i] >= MS_QUALIFICATIONS_MS_QC[i]:
+            MSMS_QUALIFICATIONS_TOF_COLOR.append("#00ff00")
+        else:
+            MSMS_QUALIFICATIONS_TOF_COLOR.append("#ff0000")
+
+
+    new_row_data_MSMS = ['Current value', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[0]}>{current_QC_MSMS_values[0]}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[1]}>{int(current_QC_MSMS_values[1])}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[2]}>{current_QC_MSMS_values[2]}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[3]}>{float(current_QC_MSMS_values[3]):.1e}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[4]}>{round(current_QC_MSMS_values[4],1)}</FONT></b>']
+    df_MSMS_qualification.loc['Current value'] = new_row_data_MSMS
+
+    df_MSMS_qualification.index = ['', '']
+
+    df_MSMS_qualification = df_MSMS_qualification.style.set_table_styles([{
+        'selector': 'th',
+        'props': [('text-align', 'center')]
+    }, {
+        'selector': 'td',
+        'props': [('text-align', 'center')]
+    }])
+
+    return df_MSMS_qualification
+
+
+"""Creates the pie chart for the disk space of drives"""
+def figure_disk_space(path):
+    labels = 'Free space (GB)', 'Total space (GB)'
+
+    total, used, free = shutil.disk_usage(path)
+    sizes = [free/ (2**30), total/ (2**30)]
+
+    if sizes[0] < 50 :
+        color = ['red', '#f4950d'] 
+    else: 
+        color = ['#00b5da', '#f4950d']
+
+    explode = (0, 0.1)  
+    fig1, ax1 = plt.subplots()
+    total = sum(sizes)
+    ax1.pie(sizes, explode=explode, labels=labels,  autopct=lambda p: '{:.0f}'.format(p * total / 100),
+            shadow=True, startangle=90, wedgeprops=dict(width=.5), textprops={'fontsize':10}, colors=color)
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    return fig1

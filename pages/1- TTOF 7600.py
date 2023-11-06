@@ -29,6 +29,20 @@ add_logo("https://allumiqs.com/wp-content/uploads/2022/06/AG-Icon-238x232.png", 
 st.title('TTOF 7600 Quality Dashboard')
 
 st.subheader("""
+Computer space""")
+st.info(f'This section shows the available space on each disk.')
+
+data_container = st.container()
+with data_container:
+    plot1, plot2 = st.columns(2)
+    with plot1:
+        st.subheader('SYSTEM (D:)')
+        st.pyplot(figure_disk_space(r'\\Zeno-7600\d'))
+    with plot2:
+        st.subheader('DATA (C:)')
+        st.pyplot(figure_disk_space(r'\\Zeno-7600\c'))
+
+st.subheader("""
 MS qualifications""")
 st.info(f'Run this section to show MS qualifications and thresholds.')
 st.warning('Work in progress')
