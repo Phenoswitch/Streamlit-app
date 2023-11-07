@@ -234,15 +234,19 @@ def table_MS_qualification_MSMS_6600(current_QC_MSMS_values):
 
 
 """Creates the pie chart for the disk space of drives"""
-def figure_disk_space(path):
+def figure_disk_space(path, skipcolor):
     labels = 'Free space (GB)', 'Total space (GB)'
 
     total, used, free = shutil.disk_usage(path)
     sizes = [free/ (2**30), total/ (2**30)]
 
-    if sizes[0] < 50 :
-        color = ['red', '#f4950d'] 
-    else: 
+    if skipcolor == False:
+
+        if sizes[0] < 50 :
+            color = ['red', '#f4950d'] 
+        else: 
+            color = ['#00b5da', '#f4950d']
+    else:
         color = ['#00b5da', '#f4950d']
 
     explode = (0, 0.1)  

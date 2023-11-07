@@ -40,10 +40,10 @@ with data_container:
     plot1, plot2 = st.columns(2)
     with plot1:
         st.subheader('SYSTEM (D:)')
-        st.pyplot(figure_disk_space(r'\\Desktop-v8lih84\d'))
+        st.pyplot(figure_disk_space(r'\\Desktop-v8lih84\d', skipcolor = False))
     with plot2:
         st.subheader('DATA (C:)')
-        st.pyplot(figure_disk_space(r'\\Desktop-v8lih84\c'))
+        st.pyplot(figure_disk_space(r'\\Desktop-v8lih84\c', skipcolor= True))
 
 
 st.subheader("""
