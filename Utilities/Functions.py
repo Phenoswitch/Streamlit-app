@@ -157,6 +157,8 @@ def fetch_detector_6600(search_dir_volt):
     return df
 
 def table_MS_qualification_TOF_6600(current_QC_TOF_values):
+    current_QC_TOF_values = [current_QC_TOF_values[current_QC_TOF_values['Tag'] == 'ITC00']['Resolution'].values[0], current_QC_TOF_values[current_QC_TOF_values['Tag'] == 'ITC00']['Intensity sum'].values[0], current_QC_TOF_values[current_QC_TOF_values['Tag'] == 'ITC01']['Resolution'].values[0], current_QC_TOF_values[current_QC_TOF_values['Tag'] == 'ITC01']['Intensity sum'].values[0]] 
+
     #Creates the multiindex df to have merged column headers in the table
     columns_MS = pd.MultiIndex.from_tuples([
         ('', 'Mass (Da)'),
@@ -173,12 +175,12 @@ def table_MS_qualification_TOF_6600(current_QC_TOF_values):
     #Here is to have green for values over the thresholds and red if under in the rendered table
     MS_QUALIFICATIONS_TOF_COLOR = []
     for i in range(len(current_QC_TOF_values)):
-        if current_QC_TOF_values[i] >= MS_QUALIFICATIONS_TOF_QC[i]:
+        if current_QC_TOF_values[i] >= MS_QUALIFICATIONS_TOFQC_ITC00[i]:
             MS_QUALIFICATIONS_TOF_COLOR.append("#00ff00")
         else:
             MS_QUALIFICATIONS_TOF_COLOR.append("#ff0000")
 
-    new_row_data = ['Current value', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[0]}>{current_QC_TOF_values[0]}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[1]}>{float(current_QC_TOF_values[1]):.1e}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[2]}>{current_QC_TOF_values[2]}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[3]}>{float(current_QC_TOF_values[3]):.1e}</FONT></b>']
+    new_row_data = ['Current value', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[0]}>{int(current_QC_TOF_values[0])}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[1]}>{float(current_QC_TOF_values[1]):.1e}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[2]}>{int(current_QC_TOF_values[2])}</FONT></b>', f'<b><FONT COLOR={MS_QUALIFICATIONS_TOF_COLOR[3]}>{float(current_QC_TOF_values[3]):.1e}</FONT></b>']
     df_MS_qualification.loc['Current value'] = new_row_data
 
     #Remove the index 0 from the render
@@ -195,6 +197,9 @@ def table_MS_qualification_TOF_6600(current_QC_TOF_values):
     return(df_MS_qualification)
 
 def table_MS_qualification_MSMS_6600(current_QC_MSMS_values):
+    current_QC_MSMS_values = [current_QC_MSMS_values[current_QC_MSMS_values['Tag'] == 'HR']['Resolution'].values[0], current_QC_MSMS_values[current_QC_MSMS_values['Tag'] == 'HR']['Intensity sum'].values[0], current_QC_MSMS_values[current_QC_MSMS_values['Tag'] == 'HS']['Resolution'].values[0], current_QC_MSMS_values[current_QC_MSMS_values['Tag'] == 'HS']['Intensity sum'].values[0], current_QC_MSMS_values[current_QC_MSMS_values['Tag'] == 'HS']['Intensity sum'].values[0]/current_QC_MSMS_values[current_QC_MSMS_values['Tag'] == 'HR']['Intensity sum'].values[0]] 
+
+
     #Creates the multiindex df to have merged column headers in the table
     columns_MSMS = pd.MultiIndex.from_tuples([
         ('', 'Mass (Da)'),
@@ -211,13 +216,13 @@ def table_MS_qualification_MSMS_6600(current_QC_MSMS_values):
 
     MSMS_QUALIFICATIONS_TOF_COLOR = []
     for i in range(len(current_QC_MSMS_values)):
-        if current_QC_MSMS_values[i] >= MS_QUALIFICATIONS_MS_QC[i]:
+        if current_QC_MSMS_values[i] >= MS_QUALIFICATIONS_MSMSQC_ITC00[i]:
             MSMS_QUALIFICATIONS_TOF_COLOR.append("#00ff00")
         else:
             MSMS_QUALIFICATIONS_TOF_COLOR.append("#ff0000")
 
 
-    new_row_data_MSMS = ['Current value', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[0]}>{current_QC_MSMS_values[0]}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[1]}>{int(current_QC_MSMS_values[1])}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[2]}>{current_QC_MSMS_values[2]}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[3]}>{float(current_QC_MSMS_values[3]):.1e}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[4]}>{round(current_QC_MSMS_values[4],1)}</FONT></b>']
+    new_row_data_MSMS = ['Current value', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[0]}>{int(current_QC_MSMS_values[0])}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[1]}>{int(current_QC_MSMS_values[1])}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[2]}>{int(current_QC_MSMS_values[2])}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[3]}>{float(current_QC_MSMS_values[3]):.1e}</FONT></b>', f'<b><FONT COLOR={MSMS_QUALIFICATIONS_TOF_COLOR[4]}>{round(current_QC_MSMS_values[4],1)}</FONT></b>']
     df_MSMS_qualification.loc['Current value'] = new_row_data_MSMS
 
     df_MSMS_qualification.index = ['', '']
@@ -257,3 +262,87 @@ def figure_disk_space(path, skipcolor):
     ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
     return fig1
+
+@st.cache_data(experimental_allow_widgets=True) 
+def fetch_MSQC_6600(MS_QC_path):
+    MS_QC_timestamp = []
+    df_list = []
+
+    for folder_path, _, files in os.walk(MS_QC_path):
+        #Filters QC type by tags
+        for TAGS in range(len(MS_QC_TAGS)):
+            for file in files:
+                if file.endswith('.txt') and MS_QC_TAGS[TAGS] in file and 'NEG' not in file:
+
+                    file_path = os.path.join(folder_path, file)
+                    MS_QC_timestamp  = file.split('_')[0]
+
+                    with open(file_path, 'r') as file:
+                        content = file.read()
+                        content = content.split('\n')
+                        data_split = [line.split('\t') for line in content]
+
+                        try:
+                            df = pd.DataFrame(data_split, columns=['Mz found (Da)', 'Resolution', 'Intensity sum'])
+                            df['Mz found (Da)'] = pd.to_numeric(df['Mz found (Da)'])
+                            df['Resolution'] = pd.to_numeric(df['Resolution'])
+                            df['Intensity sum'] = pd.to_numeric(df['Intensity sum'])
+                            closest_index = (df['Mz found (Da)'] - MS_QC_TARGETS[TAGS]).abs().idxmin()
+                            closest_row = df.iloc[closest_index]
+
+                            closest_row["Tag"] = MS_QC_TAGS[TAGS]
+                            closest_row['Timestamp'] = MS_QC_timestamp
+
+                            df_list.append(closest_row)
+                        except:
+                            print(f'Failed to compile {file}')
+
+
+    result_df = pd.concat(df_list, ignore_index=True, axis=1).T
+
+    result_df['Timestamp'] = pd.to_datetime(result_df['Timestamp'])  # Convert to datetime
+    result_df = result_df.sort_values(by ='Timestamp') #Sorts by timestamp
+
+    #Does the mean of  n1, n2 
+    averaged_df = result_df.groupby(['Timestamp', 'Tag']).mean()
+    averaged_df = averaged_df.reset_index()
+
+    return averaged_df
+
+def figure_MSQC_6600(averaged_df):
+    # averaged_df = fetch_MSQC_6600(MS_QC_path)
+
+    #Dropdown to select between Intensity sum and resolution
+    dropdown, plot = st.columns(spec = [0.25,0.75])
+    with dropdown:
+        option = st.selectbox(
+            'Data to be plotted',
+            ('Intensity sum', 'Resolution'))
+
+    fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2, sharex=True, figsize=(10, 8))
+
+    ax1.plot(averaged_df[averaged_df['Tag'] == 'ITC00']['Timestamp'],averaged_df[averaged_df['Tag'] == 'ITC00'][option] , linestyle='-', color='k')
+    ax1.plot(averaged_df[averaged_df['Tag'] == 'ITC00']['Timestamp'],[MS_QUALIFICATIONS_TOF_QC_ITC00[option]]*averaged_df[averaged_df['Tag'] == 'ITC00']['Timestamp'].shape[0]  , linestyle='-', color='r')
+
+    ax2.plot(averaged_df[averaged_df['Tag'] == 'ITC01']['Timestamp'],averaged_df[averaged_df['Tag'] == 'ITC01'][option] , linestyle='-', color='k')
+    ax2.plot(averaged_df[averaged_df['Tag'] == 'ITC01']['Timestamp'],[MS_QUALIFICATIONS_TOF_QC_ITC01[option]]*averaged_df[averaged_df['Tag'] == 'ITC01']['Timestamp'].shape[0]  , linestyle='-', color='r')
+
+    ax3.plot(averaged_df[averaged_df['Tag'] == 'HS']['Timestamp'],averaged_df[averaged_df['Tag'] == 'HS'][option] , linestyle='-', color='k')
+    ax3.plot(averaged_df[averaged_df['Tag'] == 'HS']['Timestamp'],[MS_QUALIFICATIONS_MSMS_QC_HS[option]]*averaged_df[averaged_df['Tag'] == 'HS']['Timestamp'].shape[0]  , linestyle='-', color='r')
+
+    ax4.plot(averaged_df[averaged_df['Tag'] == 'HR']['Timestamp'],averaged_df[averaged_df['Tag'] == 'HR'][option] , linestyle='-', color='k')
+    ax4.plot(averaged_df[averaged_df['Tag'] == 'HR']['Timestamp'],[MS_QUALIFICATIONS_MSMS_QC_HR[option]]*averaged_df[averaged_df['Tag'] == 'HR']['Timestamp'].shape[0]  , linestyle='-', color='r')
+
+    ax5.plot(averaged_df[averaged_df['Tag'] == 'HR']['Timestamp'],averaged_df[averaged_df['Tag'] == 'HS']['Intensity sum'].values/averaged_df[averaged_df['Tag'] == 'HR']['Intensity sum'].values , linestyle='-', color='k')
+    ax5.plot(averaged_df[averaged_df['Tag'] == 'HR']['Timestamp'],[MS_QUALIFICATIONS_MSMS_QC_HR['Ratio']]*averaged_df[averaged_df['Tag'] == 'HR']['Timestamp'].shape[0]  , linestyle='-', color='r')
+
+    # Sets titles for each subplots
+    ax1.set_title('TOF MS+ ITC 00')
+    ax2.set_title('TOF MS+ ITC 01')
+    ax3.set_title('MS/MS+ HS ITC 10')
+    ax4.set_title('MS/MS+ HR ITC 10')
+    ax5.set_title('HS/HR ITC 10 intensity gain')
+
+    plt.tight_layout()
+
+    return fig

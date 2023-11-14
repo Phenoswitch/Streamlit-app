@@ -20,7 +20,7 @@ current_datetime = datetime.now()
 current_date = current_datetime.strftime("%Y-%m-%d")
 
 ### To be run once to update matplotlib default parameters
-matplotlib.rcParams.update({'font.size': 20, 'xtick.color' : 'black', 'axes.labelcolor': 'black'})
+matplotlib.rcParams.update({'font.size': 14, 'xtick.color' : 'black', 'axes.labelcolor': 'black'})
 st.set_page_config(layout="wide")
 
 locale.setlocale(locale.LC_ALL, '')
@@ -51,16 +51,17 @@ MS qualifications""")
 st.warning('Work in progress')
 st.info(r'Run this section to show MS qualifications and thresholds. This opens and extract the MS qualifications saved in the C:\Users\6600plus\Desktop\QC_Report\QC 30MCA 6600plus_A Compiler folder.')
 st.write('The 6600 TTOF specifications listed here are the in-house Allumiqs thresholds for a positive tuning performed with the iPD1-CsI homemade tuning solution.')
-st.write('The last tuning qualifications found in the folder is from . ')
+st.write(r'The last tuning qualifications found in the folder is from DESKTOP-V8LIH84\Users\6600\Desktop\QC 6600 Report\QC 30MCA 6600_A Compiler\2023. ')
+
+MS_QC_path = r'\\DESKTOP-V8LIH84\Users\6600\Desktop\QC 6600 Report\QC 30MCA 6600_A Compiler\2023'
+
+MS_QC_values = fetch_MSQC_6600(MS_QC_path)
+
+current_values = MS_QC_values[MS_QC_values['Timestamp'] == MS_QC_values['Timestamp'].iloc[-1]]
 
 """ Qualifications in TOF MS """
-
-current_ITC00_res = 37000
-current_ITC00_int = 0.5*10**6
-current_ITC01_res = 29000
-current_ITC01_int = 0.5*10**4
-
-current_QC_TOF_values = [current_ITC00_res, current_ITC00_int, current_ITC01_res, current_ITC01_int]
+desired_tags = ['ITC00', 'ITC01']
+current_QC_TOF_values = current_values[current_values['Tag'].isin(desired_tags)]
 
 #Creates the formated table with thresholds 
 df_MS_qualification_TOF =  table_MS_qualification_TOF_6600(current_QC_TOF_values)
@@ -68,19 +69,18 @@ df_MS_qualification_TOF =  table_MS_qualification_TOF_6600(current_QC_TOF_values
 st.write(df_MS_qualification_TOF.to_html(), unsafe_allow_html= True)
 
 """ Qualifications in TOF MSMS """
-current_HR_res = 37000
-current_HR_int = 0.5*10**6
-current_HS_res = 32000
-current_HS_int = 0.5*10**4
-current_HSHR_ratio = 3.424275
-
-current_QC_MSMS_values = [current_HR_res, current_HR_int, current_HS_res, current_HS_int,current_HSHR_ratio]
+desired_tags = ['HR', 'HS']
+current_QC_MSMS_values = current_values[current_values['Tag'].isin(desired_tags)]
 
 #Creates the formated table with thresholds 
 df_MSMS_qualification =  table_MS_qualification_MSMS_6600(current_QC_MSMS_values)
 #Renders the formated df to Streamlit
 st.write(df_MSMS_qualification.to_html(), unsafe_allow_html= True)
 
+### Creates the timeline of QC values ###
+fig = figure_MSQC_6600(MS_QC_values)
+
+st.plotly_chart(fig, use_container_width = True, theme=None)
 
 st.subheader("""
 LC-MS calibrations""")
