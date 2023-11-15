@@ -273,8 +273,11 @@ def fetch_MSQC_6600(MS_QC_path):
         for TAGS in range(len(MS_QC_TAGS)):
             for file in files:
                 if file.endswith('.txt') and MS_QC_TAGS[TAGS] in file and 'NEG' not in file:
+                    print(file)
 
                     file_path = os.path.join(folder_path, file)
+                    print(file_path)
+
                     MS_QC_timestamp  = file.split('_')[0]
 
                     with open(file_path, 'r') as file:
@@ -300,6 +303,8 @@ def fetch_MSQC_6600(MS_QC_path):
 
     result_df = pd.concat(df_list, ignore_index=True, axis=1).T
 
+    result_df.to_excel(r"C:\Users\6600plus\Downloads\output.xlsx")
+
     result_df['Timestamp'] = pd.to_datetime(result_df['Timestamp'])  # Convert to datetime
     result_df = result_df.sort_values(by ='Timestamp') #Sorts by timestamp
 
@@ -310,8 +315,6 @@ def fetch_MSQC_6600(MS_QC_path):
     return averaged_df
 
 def figure_MSQC_6600(averaged_df):
-    # averaged_df = fetch_MSQC_6600(MS_QC_path)
-
     #Dropdown to select between Intensity sum and resolution
     dropdown, plot = st.columns(spec = [0.25,0.75])
     with dropdown:

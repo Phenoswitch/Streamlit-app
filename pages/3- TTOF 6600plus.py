@@ -45,8 +45,37 @@ with data_container:
 
 st.subheader("""
 MS qualifications""")
-st.info(f'Run this section to show MS qualifications and thresholds.')
-st.warning('Work in progress')
+st.info(r'Run this section to show MS qualifications and thresholds. This opens and extract the MS qualifications saved in the C:\Users\6600plus\Desktop\QC_Report\QC 30MCA 6600plus_A Compiler\2023 folder.')
+st.write('The 6600 TTOF specifications listed here are the in-house Allumiqs thresholds for a positive tuning performed with the iPD1-CsI homemade tuning solution.')
+
+MS_QC_path = r'C:\Users\6600plus\Desktop\QC_Report\QC 30MCA 6600plus_A Compiler\2023'
+
+MS_QC_values = fetch_MSQC_6600(MS_QC_path)
+
+current_values = MS_QC_values[MS_QC_values['Timestamp'] == MS_QC_values['Timestamp'].iloc[-1]]
+
+""" Qualifications in TOF MS """
+desired_tags = ['ITC00', 'ITC01']
+current_QC_TOF_values = current_values[current_values['Tag'].isin(desired_tags)]
+
+#Creates the formated table with thresholds 
+df_MS_qualification_TOF =  table_MS_qualification_TOF_6600(current_QC_TOF_values)
+#Renders the formated df to Streamlit
+st.write(df_MS_qualification_TOF.to_html(), unsafe_allow_html= True)
+
+""" Qualifications in TOF MSMS """
+desired_tags = ['HR', 'HS']
+current_QC_MSMS_values = current_values[current_values['Tag'].isin(desired_tags)]
+
+#Creates the formated table with thresholds 
+df_MSMS_qualification =  table_MS_qualification_MSMS_6600(current_QC_MSMS_values)
+#Renders the formated df to Streamlit
+st.write(df_MSMS_qualification.to_html(), unsafe_allow_html= True)
+
+### Creates the timeline of QC values ###
+fig = figure_MSQC_6600(MS_QC_values)
+
+st.plotly_chart(fig, use_container_width = True, theme=None)
 
 st.subheader("""
 LC-MS calibrations""")

@@ -48,10 +48,8 @@ with data_container:
 
 st.subheader("""
 MS qualifications""")
-st.warning('Work in progress')
-st.info(r'Run this section to show MS qualifications and thresholds. This opens and extract the MS qualifications saved in the C:\Users\6600plus\Desktop\QC_Report\QC 30MCA 6600plus_A Compiler folder.')
+st.info(r'Run this section to show MS qualifications and thresholds. This opens and extract the MS qualifications saved in the DESKTOP-V8LIH84\Users\6600\Desktop\QC 6600 Report\QC 30MCA 6600_A Compiler\2023 folder.')
 st.write('The 6600 TTOF specifications listed here are the in-house Allumiqs thresholds for a positive tuning performed with the iPD1-CsI homemade tuning solution.')
-st.write(r'The last tuning qualifications found in the folder is from DESKTOP-V8LIH84\Users\6600\Desktop\QC 6600 Report\QC 30MCA 6600_A Compiler\2023. ')
 
 MS_QC_path = r'\\DESKTOP-V8LIH84\Users\6600\Desktop\QC 6600 Report\QC 30MCA 6600_A Compiler\2023'
 
