@@ -47,6 +47,11 @@ MS qualifications""")
 st.info(f'Run this section to show MS qualifications and thresholds.')
 st.warning('Work in progress')
 
+
+st.info(r'Run this section to show MS qualifications and thresholds. This opens the positif quick MS check only and extract the MS qualifications saved in the \\Zeno-7600\v\Tuning_report\System check\Positive mode folder.')
+st.info(r'While performing the Quick MS check, AUX Gas needs to be setted at 10 psi. The only threshold is for the intensity in TOF MS/MS Zeno Off ion of 494.3374 > 1e5.')
+
+
 st.subheader("""
 LC-MS calibrations""")
 st.info(f'Run this section to show all LC-MS calibration informations and trends.')

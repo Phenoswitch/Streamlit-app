@@ -37,6 +37,25 @@ def table_selector_datetime(df, list_select,slider_lim):
     selected_rows = edited_df[edited_df.Select]
     return selected_rows.drop('Select', axis=1)
 
+"""Create a table for datetime with checkboxes selector"""
+def table_selector(df, list_select):
+    df_with_selections = df.copy()
+
+    if not list_select:
+        df_with_selections.insert(0, "Select", True)
+
+    # Get dataframe row-selections from user with st.data_editor
+    edited_df = st.data_editor(
+        df_with_selections,
+        hide_index=True,
+        column_config={"Select": st.column_config.CheckboxColumn(required=True)},
+        disabled=df.columns,
+    )
+
+    # Filter the dataframe using the temporary column, then drop the column
+    selected_rows = edited_df[edited_df.Select]
+    return selected_rows.drop('Select', axis=1)
+
 """Create a slider for datetime"""
 def sliders_datetime(slide_min,slide_max):
     slider = st.slider(
@@ -82,7 +101,7 @@ def fetch_detector_zeno(search_dir_volt):
                     f = os.path.join(root, filename)
                     try:
                         doc = fitz.open(f)
-                        page = doc[0] #Only page 2 in revelate
+                        page = doc[0] 
                         text = page.get_text().split('\n')
 
                         if 'Positive Detector Optimization' in text:
@@ -349,3 +368,4 @@ def figure_MSQC_6600(averaged_df):
     plt.tight_layout()
 
     return fig
+
