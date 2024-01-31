@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 import os
-import fitz
+# import fitz
 from PyPDF2 import PdfReader
 
 
