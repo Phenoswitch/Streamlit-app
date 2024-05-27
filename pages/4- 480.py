@@ -67,7 +67,7 @@ grid_table = table_selector(file_names, list_select)
 list_select = grid_table
 
 
-choice_export = st.radio("Select what you want to plot", ["TIC", "Pressure trace", "XIC"])
+choice_export = st.radio("Select what you want to plot", ["TIC", "Pressure trace", "Sampler pressure", "XIC"])
 
 if choice_export == 'XIC':
     XIC_mass = st.number_input("Enter mass to perform XIC")
@@ -88,6 +88,11 @@ if choice_export == 'Pressure trace':
     grid_table["Display"] = "True"
     grid_table["Detector Type"] = "A/D Card 2"
     grid_table["Trace Type"] = "Pump_Pressure@0"
+
+if choice_export == 'Sampler pressure':
+    grid_table["Display"] = "True"
+    grid_table["Detector Type"] = "A/D Card"
+    grid_table["Trace Type"] = "Sampler_Pressure"
 
 st.write("You can directly copy/paste this table is Freestyle")
 
