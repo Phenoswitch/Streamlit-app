@@ -100,6 +100,11 @@ if choice_export == 'Sampler pressure':
     grid_table["Detector Type"] = "A/D Card"
     grid_table["Trace Type"] = "Sampler_Pressure"
 
+if choice_export == 'Sampler pressure':
+    grid_table["Display"] = "True"
+    grid_table["Detector Type"] = "A/D Card"
+    grid_table["Trace Type"] = "Sampler_Pressure"
+
 st.write("You can directly copy/paste this table is Freestyle")
 
 df_formated_export = pd.read_excel(os.path.join(subdirectory_folder_path, '..','XIC_lists\\XIC_list_template.xlsx'))
